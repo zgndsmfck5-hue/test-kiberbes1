@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тест: Кибербезопасность</title>
+  <style>
+    /* ================= БАЗОВЫЕ СТИЛИ ================= */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background-color: #0b0c10;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    /* ================= ЭКРАНЫ И АНИМАЦИИ ================= */
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #0b0c10;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s;
+    }
+    .screen.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Затемнение фона для читаемости текста (для вопросов) */
+    .screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(10, 11, 20, 0.75), rgba(30, 20, 60, 0.85));
+      z-index: 0;
+    }
+
+    /* Для стартового и финального экранов делаем затемнение очень легким */
+    #screen-start::before, #screen-results::before {
+      background: rgba(0, 0, 0, 0.3); 
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 800px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      
+      transform: translateY(20px) scale(0.95);
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .screen.active .content {
+      transform: translateY(0) scale(1);
+    }
+
+    /* Стартовый экран */
+    #screen-start .content {
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: none;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
+      padding-bottom: 50px;
+    }
+
+    /* Финальный экран - настраиваем плашку для результатов */
+    #screen-results .content {
+      background: rgba(5, 10, 20, 0.7); /* Темная плашка, чтобы текст читался */
+      border: 2px solid rgba(34, 197, 94, 0.4); /* Зеленая неоновая рамка */
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+      text-align: center;
+      max-width: 500px;
+      padding: 30px;
+    }
+
+    /* ================= ТИПОГРАФИКА ================= */
+    h1 { font-size: 2.5rem; margin-bottom: 15px; text-align: center; line-height: 1.2; }
+    h2 { font-size: 1.6rem; margin-bottom: 25px; line-height: 1.4; text-align: center;}
+    p { color: #cbd5e1; font-size: 1.2rem; text-align: center; margin-bottom: 20px; }
+
+    /* ================= КНОПКИ ================= */
+    .btn {
+      background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+      color: #000;
+      border: none;
+      padding: 18px 50px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.6);
+      animation: pulse-btn 2s infinite;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(0, 242, 254, 0.9);
+    }
+
+    /* Зеленая кнопка для финала */
+    #screen-results .btn {
+      background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+      color: #fff;
+      animation: pulse-btn-green 2s infinite;
+    }
+    #screen-results .btn:hover {
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.9);
+    }
+
+    @keyframes pulse-btn {
+      0% { box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); }
+      50% { box-shadow: 0 0 30px rgba(0, 242, 254, 1); }
+      100% { box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); }
+    }
+    @keyframes pulse-btn-green {
+      0% { box-shadow: 0 0 15px rgba(34, 197, 94, 0.5); }
+      50% { box-shadow: 0 0 30px rgba(34, 197, 94, 1); }
+      100% { box-shadow: 0 0 15px rgba(34, 197, 94, 0.5); }
+    }
+
+    /* ================= ВАРИАНТЫ ОТВЕТОВ ================= */
+    .answers {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .answer {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 18px 20px;
+      border-radius: 16px;
+      font-size: 1.1rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .answer .letter {
+      background: rgba(255, 255, 255, 0.2);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .answer:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateX(5px);
+    }
+    .answer:disabled { cursor: default; }
+
+    .answer.correct {
+      background: rgba(34, 197, 94, 0.2) !important;
+      border-color: #22c55e !important;
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+    }
+    .answer.correct .letter { background: #22c55e; }
+
+    .answer.wrong {
+      background: rgba(239, 68, 68, 0.15) !important;
+      border-color: #ef4444 !important;
+    }
+    .answer.wrong .letter { background: #ef4444; }
+
+    /* ================= ПРОГРЕСС И РЕЗУЛЬТАТЫ ================= */
+    .progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      margin-bottom: 25px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00f2fe, #4facfe);
+      width: 20%;
+      transition: width 0.4s ease;
+    }
+    
+    .score { 
+      font-size: 4rem; 
+      font-weight: 800; 
+      color: #22c55e; 
+      text-align: center; 
+      margin: 10px 0; 
+      text-shadow: 0 0 20px rgba(34,197,94,0.6);
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ЭКРАН СТАРТА -->
+  <section class="screen active" id="screen-start">
+    <div class="content">
+      <button class="btn" onclick="startQuiz()">Начать тест</button>
+    </div>
+  </section>
+
+  <!-- ЭКРАН ВОПРОСА -->
+  <section class="screen" id="screen-quiz">
+    <div class="content">
+      <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+      <h2 id="q-text">Текст вопроса</h2>
+      <div class="answers" id="answers-box"></div>
+    </div>
+  </section>
+
+  <!-- ЭКРАН РЕЗУЛЬТАТОВ -->
+  <section class="screen" id="screen-results">
+    <div class="content">
+      <!-- Убрали заголовок h1, так как он есть на картинке -->
+      <p id="res-verdict">Твой результат:</p>
+      <div class="score" id="res-score">0 / 5</div>
+      <button class="btn" onclick="startQuiz()">Пройти ещё раз</button>
+    </div>
+  </section>
+
+  <script>
+    /* =========================================================
+       НАСТРОЙКА ФОНОВ
+       ========================================================= */
+    const IMAGES = {
+      // Не забудь положить картинки в папку images
+      start: 'images/bg-start.jpg',       // Картинка с "КИБЕР-ЩИТ"
+      results: 'images/bg-results.jpg',   // Новая картинка с мальчиком и роботом
+      
+      // Остальные фоны
+      extra1: 'images/bg-extra1.jpg',     
+      extra2: 'images/bg-extra2.jpg',
+      extra3: 'images/bg-extra3.jpg',
+      extra4: 'images/bg-extra4.jpg',
+      extra5: 'images/bg-extra5.jpg',
+
+      // Вопросы
+      q1: 'images/q1.jpg', 
+      q2: 'images/q2.jpg', 
+      q3: 'images/q3.jpg', 
+      q4: 'images/q4.jpg', 
+      q5: 'images/q5.jpg'  
+    };
+
+    /* =========================================================
+       ВОПРОСЫ
+       ========================================================= */
+    const QUESTIONS = [
+      {
+        text: '1. Что такое кибербуллинг?',
+        bg: IMAGES.q1,
+        answers: [
+          'Случайный спор о том, какая видеоигра лучше',
+          'Жестокая и повторяющаяся травля, оскорбления или угрозы в интернете',
+          'Когда друг не прочитал твое сообщение в мессенджере',
+          'Вежливая подсказка о том, как решить задачу по математике'
+        ],
+        correct: 1 
+      },
+      {
+        text: '2. Тебе в личные сообщения начали приходить неприятные угрозы и оскорбления. Как поступить правильнее всего?',
+        bg: IMAGES.q2,
+        answers: [
+          'Начать отвечать грубостью и угрозами в ответ',
+          'Удалить переписку и никому об этом не рассказывать',
+          'Написать гневный пост обо всех в школьном паблике',
+          'Сделать скриншоты переписки, заблокировать обидчика и рассказать взрослому'
+        ],
+        correct: 3 
+      },
+      {
+        text: '3. Тебе на телефон звонит незнакомый дядя серьезным голосом и говорит: «Я из милиции! Твои родители попали в беду, срочно переведи мне деньги с маминой карты!». Что делать?',
+        bg: IMAGES.q3,
+        answers: [
+          'Взять мамину карту и перевести деньги, чтобы помочь родителям',
+          'Сбросить звонок и сразу рассказать о нем родителям или бабушке',
+          'Испугаться и пересказать ему все домашние секреты',
+          'Попросить у него фамилию и адрес, чтобы самому приехать в милицию'
+        ],
+        correct: 1 
+      },
+      {
+        text: '4. Что такое «цифровой след» в интернете?',
+        bg: IMAGES.q4,
+        answers: [
+          'Вся информация о тебе (посты, фото, комментарии и лайки), которая остаётся в сети',
+          'Специальный вирус, который следит за геопозицией телефона',
+          'Общее число подписчиков в твоем профиле',
+          'История просмотров в режиме «инкогнито»'
+        ],
+        correct: 0 
+      },
+      {
+        text: '5. Что происходит, если человек нарушает закон или чужие права?',
+        bg: IMAGES.q5,
+        answers: [
+          'Ничего не происходит, до 18 лет законы не работают',
+          'Ему всегда просто дарят новую конфету',
+          'Наступает ответственность: от замечания до наказания по закону',
+          'Учитель навсегда забирает школьный дневник'
+        ],
+        correct: 2 
+      }
+    ];
+
+    /* =========================================================
+       ЛОГИКА ТЕСТА
+       ========================================================= */
+    const screens = {
+      start: document.getElementById('screen-start'),
+      quiz: document.getElementById('screen-quiz'),
+      results: document.getElementById('screen-results')
+    };
+    
+    const qText = document.getElementById('q-text');
+    const answersBox = document.getElementById('answers-box');
+    const progressFill = document.getElementById('progress');
+    
+    let currentIndex = 0;
+    let score = 0;
+    const DELAY = 1800;
+
+    // Инициализация фонов при загрузке
+    screens.start.style.backgroundImage = `url('${IMAGES.start}')`;
+    screens.results.style.backgroundImage = `url('${IMAGES.results}')`;
+
+    function showScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
+
+    function startQuiz() {
+      currentIndex = 0;
+      score = 0;
+      showScreen('quiz');
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = QUESTIONS[currentIndex];
+      
+      screens.quiz.style.backgroundImage = `url('${q.bg}')`;
+      progressFill.style.width = `${((currentIndex + 1) / QUESTIONS.length) * 100}%`;
+      qText.textContent = q.text;
+      answersBox.innerHTML = '';
+      
+      const letters = ['A', 'B', 'C', 'D'];
+      q.answers.forEach((answer, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer';
+        btn.innerHTML = `<span class="letter">${letters[index]}</span> <span>${answer}</span>`;
+        btn.onclick = () => handleAnswer(index, btn);
+        answersBox.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(selectedIndex, clickedBtn) {
+      const q = QUESTIONS[currentIndex];
+      const allBtns = document.querySelectorAll('.answer');
+      
+      allBtns.forEach(b => b.disabled = true);
+      allBtns[q.correct].classList.add('correct');
+      
+      if (selectedIndex !== q.correct) {
+        clickedBtn.classList.add('wrong');
+      } else {
+        score++;
+      }
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < QUESTIONS.length) {
+          renderQuestion();
+        } else {
+          showResults();
+        }
+      }, DELAY);
+    }
+
+    function showResults() {
+      showScreen('results');
+      
+      const total = QUESTIONS.length;
+      const percent = (score / total) * 100;
+      
+      let verdict = '';
+      if (percent === 100) verdict = 'Идеально! Ты настоящий эксперт по кибербезопасности.';
+      else if (percent >= 80) verdict = 'Отличный результат! Ты знаешь, как защитить себя.';
+      else if (percent >= 50) verdict = 'Неплохо, но некоторые правила стоит повторить.';
+      else verdict = 'Будь осторожнее! Стоит изучить базовые правила безопасности.';
+
+      // Выводим результат
+      document.getElementById('res-score').textContent = `${score} / ${total}`;
+      document.getElementById('res-verdict').textContent = verdict;
+    }
+  </script>
+</body>
+</html>
