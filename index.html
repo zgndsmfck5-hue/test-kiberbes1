@@ -2,7 +2,6 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <!-- Этот тег критически важен для правильного масштабирования на телефонах -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Тест: Кибербезопасность</title>
   <style>
@@ -12,7 +11,6 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background-color: #0b0c10;
       color: #fff;
-      /* Убираем жесткий overflow: hidden, чтобы можно было скроллить, если экран маленький */
       overflow-x: hidden; 
       width: 100%;
       min-height: 100dvh;
@@ -26,7 +24,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 15px; /* Меньше отступы по краям для мобилок */
+      padding: 15px; 
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -34,7 +32,7 @@
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.5s ease, visibility 0.5s;
-      overflow-y: auto; /* Разрешаем скролл внутри экрана, если не влезает */
+      overflow-y: auto; 
     }
     
     .screen.active {
@@ -49,12 +47,12 @@
       inset: 0;
       background: linear-gradient(135deg, rgba(10, 11, 20, 0.75), rgba(30, 20, 60, 0.85));
       z-index: 0;
-      /* Фикс для iOS Safari, чтобы фон не обрезался */
       min-height: 100%; 
     }
 
+    /* Легкое затемнение для старта и финала */
     #screen-start::before, #screen-results::before {
-      background: rgba(0, 0, 0, 0.4); 
+      background: rgba(0, 0, 0, 0.3); 
     }
 
     /* ================= КОНТЕЙНЕР КОНТЕНТА ================= */
@@ -63,7 +61,7 @@
       z-index: 1;
       width: 100%;
       max-width: 700px;
-      margin: auto; /* Центрирование по вертикали и горизонтали */
+      margin: auto; 
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
@@ -90,7 +88,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-end;
-      min-height: 80vh; /* Чтобы кнопка была внизу картинки */
+      min-height: 80vh; 
       padding-bottom: 50px;
     }
 
@@ -103,19 +101,9 @@
       max-width: 450px;
     }
 
-    /* ================= ТЕКСТ (Адаптивный) ================= */
-    h2 { 
-      font-size: clamp(1.2rem, 4vw, 1.6rem); /* Автоматически меняет размер */
-      margin-bottom: 20px; 
-      line-height: 1.4; 
-      text-align: center;
-    }
-    p { 
-      color: #cbd5e1; 
-      font-size: clamp(1rem, 3.5vw, 1.2rem); 
-      text-align: center; 
-      margin-bottom: 15px; 
-    }
+    /* ================= ТЕКСТ ================= */
+    h2 { font-size: clamp(1.2rem, 4vw, 1.6rem); margin-bottom: 20px; line-height: 1.4; text-align: center; }
+    p { color: #cbd5e1; font-size: clamp(1rem, 3.5vw, 1.2rem); text-align: center; margin-bottom: 15px; }
 
     /* ================= КНОПКИ ================= */
     .btn {
@@ -134,7 +122,7 @@
       animation: pulse-btn 2s infinite;
       margin-top: 10px;
       width: 100%;
-      max-width: 300px; /* Не растягиваем кнопку на всю ширину */
+      max-width: 300px; 
     }
     .btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 242, 254, 0.9); }
 
@@ -189,7 +177,6 @@
       border-color: rgba(255, 255, 255, 0.4);
     }
     
-    /* Убираем сдвиг вправо на мобильных, чтобы не было обрезки */
     @media (min-width: 600px) {
       .answer:hover:not(:disabled) { transform: translateX(5px); }
     }
@@ -226,38 +213,23 @@
       text-shadow: 0 0 20px rgba(34,197,94,0.6); line-height: 1;
     }
 
-    /* ================= СПЕЦИАЛЬНО ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ (Телефоны) ================= */
     @media (max-width: 500px) {
-      .content {
-        padding: 20px 15px; /* Уменьшаем отступы внутри карточки */
-        border-radius: 16px;
-      }
-      #screen-start .content {
-        padding-bottom: 30px; /* Кнопка чуть выше */
-      }
-      #screen-results .content {
-        padding: 25px 15px;
-      }
-      .answer {
-        padding: 12px; /* Кнопки чуть тоньше, чтобы влезло 4 штуки на экран */
-        gap: 10px;
-      }
-      .answer .letter {
-        width: 26px; height: 26px; font-size: 0.8rem;
-      }
+      .content { padding: 20px 15px; border-radius: 16px; }
+      #screen-start .content { padding-bottom: 30px; }
+      #screen-results .content { padding: 25px 15px; }
+      .answer { padding: 12px; gap: 10px; }
+      .answer .letter { width: 26px; height: 26px; font-size: 0.8rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ЭКРАН СТАРТА -->
   <section class="screen active" id="screen-start">
     <div class="content">
       <button class="btn" onclick="startQuiz()">Начать тест</button>
     </div>
   </section>
 
-  <!-- ЭКРАН ВОПРОСА -->
   <section class="screen" id="screen-quiz">
     <div class="content">
       <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
@@ -266,7 +238,6 @@
     </div>
   </section>
 
-  <!-- ЭКРАН РЕЗУЛЬТАТОВ -->
   <section class="screen" id="screen-results">
     <div class="content">
       <p id="res-verdict">Твой результат:</p>
@@ -276,14 +247,17 @@
   </section>
 
   <script>
+    /* =========================================================
+       ТВОИ КАРТИНКИ (Они будут искаться в папке images)
+       ========================================================= */
     const IMAGES = {
-      start: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1920&auto=format&fit=crop',
-      results: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1920&auto=format&fit=crop',
-      q1: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=80&w=1920&auto=format&fit=crop',
-      q2: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1920&auto=format&fit=crop',
-      q3: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?q=80&w=1920&auto=format&fit=crop',
-      q4: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=1920&auto=format&fit=crop',
-      q5: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=1920&auto=format&fit=crop'
+      start: 'images/bg-start.jpg',       // Картинка "КИБЕР-ЩИТ"
+      results: 'images/bg-results.jpg',   // Картинка "КВЕСТ ПРОЙДЕН"
+      q1: 'images/q1.jpg',                // Вопрос 1
+      q2: 'images/q2.jpg',                // Вопрос 2
+      q3: 'images/q3.jpg',                // Вопрос 3
+      q4: 'images/q4.jpg',                // Вопрос 4
+      q5: 'images/q5.jpg'                 // Вопрос 5
     };
 
     const QUESTIONS = [
