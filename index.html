@@ -50,7 +50,6 @@
       min-height: 100%; 
     }
 
-    /* Легкое затемнение для старта и финала */
     #screen-start::before, #screen-results::before {
       background: rgba(0, 0, 0, 0.3); 
     }
@@ -77,7 +76,6 @@
       transform: translateY(0) scale(1);
     }
 
-    /* Стартовый экран */
     #screen-start .content {
       background: transparent;
       backdrop-filter: none;
@@ -92,7 +90,6 @@
       padding-bottom: 50px;
     }
 
-    /* Финальный экран */
     #screen-results .content {
       background: rgba(5, 10, 20, 0.8);
       border: 2px solid rgba(34, 197, 94, 0.4);
@@ -102,7 +99,7 @@
     }
 
     /* ================= ТЕКСТ ================= */
-    h2 { font-size: clamp(1.2rem, 4vw, 1.6rem); margin-bottom: 20px; line-height: 1.4; text-align: center; }
+    h2 { font-size: clamp(1.1rem, 3.5vw, 1.5rem); margin-bottom: 20px; line-height: 1.4; text-align: center; }
     p { color: #cbd5e1; font-size: clamp(1rem, 3.5vw, 1.2rem); text-align: center; margin-bottom: 15px; }
 
     /* ================= КНОПКИ ================= */
@@ -153,7 +150,7 @@
       color: #fff;
       padding: 15px;
       border-radius: 12px;
-      font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+      font-size: clamp(0.9rem, 3vw, 1rem);
       text-align: left;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -172,16 +169,21 @@
       font-size: 0.9rem;
     }
     
-    .answer:hover:not(:disabled) {
+    .answer:hover:not(.disabled) {
       background: rgba(255, 255, 255, 0.15);
       border-color: rgba(255, 255, 255, 0.4);
     }
     
     @media (min-width: 600px) {
-      .answer:hover:not(:disabled) { transform: translateX(5px); }
+      .answer:hover:not(.disabled) { transform: translateX(5px); }
     }
 
-    .answer:disabled { cursor: default; }
+    .answer.selected {
+      background: rgba(0, 242, 254, 0.2) !important;
+      border-color: #00f2fe !important;
+    }
+
+    .answer.disabled { cursor: default; }
 
     .answer.correct {
       background: rgba(34, 197, 94, 0.25) !important;
@@ -196,6 +198,23 @@
     }
     .answer.wrong .letter { background: #ef4444; }
 
+    /* Кнопка "Дальше" для мультивыбора */
+    .next-btn {
+      display: none;
+      margin-top: 20px;
+      background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+      color: #000;
+      font-weight: bold;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 1rem;
+      border: none;
+      text-transform: uppercase;
+    }
+    .next-btn.show { display: block; }
+
     /* ================= ПРОГРЕСС И РЕЗУЛЬТАТЫ ================= */
     .progress-bar {
       height: 6px; background: rgba(255, 255, 255, 0.1);
@@ -203,7 +222,7 @@
     }
     .progress-fill {
       height: 100%; background: linear-gradient(90deg, #00f2fe, #4facfe);
-      width: 20%; transition: width 0.4s ease;
+      width: 6.6%; transition: width 0.4s ease;
     }
     
     .score { 
@@ -235,32 +254,45 @@
       <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
       <h2 id="q-text">Текст вопроса</h2>
       <div class="answers" id="answers-box"></div>
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()">Дальше</button>
     </div>
   </section>
 
   <section class="screen" id="screen-results">
     <div class="content">
       <p id="res-verdict">Твой результат:</p>
-      <div class="score" id="res-score">0 / 5</div>
+      <div class="score" id="res-score">0 / 15</div>
       <button class="btn" onclick="startQuiz()">Пройти ещё раз</button>
     </div>
   </section>
 
   <script>
     /* =========================================================
-       ТВОИ КАРТИНКИ (Они будут искаться в папке images)
+       ЗДЕСЬ МЫ ДОБАВИЛИ ПУТИ ДЛЯ НОВЫХ 10 КАРТИНОК
        ========================================================= */
     const IMAGES = {
-      start: 'images/bg-start.jpg',       // Картинка "КИБЕР-ЩИТ"
-      results: 'images/bg-results.jpg',   // Картинка "КВЕСТ ПРОЙДЕН"
-      q1: 'images/q1.jpg',                // Вопрос 1
-      q2: 'images/q2.jpg',                // Вопрос 2
-      q3: 'images/q3.jpg',                // Вопрос 3
-      q4: 'images/q4.jpg',                // Вопрос 4
-      q5: 'images/q5.jpg'                 // Вопрос 5
+      start: 'images/bg-start.jpg',
+      results: 'images/bg-results.jpg',
+      q1: 'images/q1.jpg',
+      q2: 'images/q2.jpg',
+      q3: 'images/q3.jpg',
+      q4: 'images/q4.jpg',
+      q5: 'images/q5.jpg',
+      // Новые фоны для вопросов 6-15
+      q6: 'images/q6.jpg',
+      q7: 'images/q7.jpg',
+      q8: 'images/q8.jpg',
+      q9: 'images/q9.jpg',
+      q10: 'images/q10.jpg',
+      q11: 'images/q11.jpg',
+      q12: 'images/q12.jpg',
+      q13: 'images/q13.jpg',
+      q14: 'images/q14.jpg',
+      q15: 'images/q15.jpg'
     };
 
     const QUESTIONS = [
+      // --- 1-5 ВОПРОСЫ ---
       {
         text: '1. Что такое кибербуллинг?',
         bg: IMAGES.q1,
@@ -315,6 +347,112 @@
           'Учитель навсегда забирает школьный дневник'
         ],
         correct: 2 
+      },
+
+      // --- 6-10 ВОПРОСЫ ---
+      {
+        text: '6. Тебе приходит сообщение якобы от администрации школы: «Твой аккаунт будет заблокирован! Срочно перейди по ссылке и введи пароль». Что делать?',
+        bg: IMAGES.q6,
+        answers: [
+          'Сразу перейти по ссылке и ввести пароль',
+          'Ответить отправителю и попросить пароль',
+          'Не переходить по ссылке и проверить информацию через официальный сайт или учителя',
+          'Переслать сообщение всем друзьям'
+        ],
+        correct: 2
+      },
+      {
+        text: '7. Какие признаки могут указывать на интернет-мошенничество? (Выбери ВСЕ подходящие варианты)',
+        bg: IMAGES.q7,
+        answers: [
+          'Требуют срочно перевести деньги или сообщить код из SMS',
+          'Присылают подозрительную ссылку на неизвестный сайт',
+          'Предлагают ознакомиться с правилами конкурса на официальном сайте без требования личных данных',
+          'Обещают дорогой подарок за небольшую предоплату'
+        ],
+        correct: [0, 1, 3] 
+      },
+      {
+        text: '8. Никому нельзя сообщать одноразовые коды подтверждения из SMS или приложения, даже если человек представляется сотрудником службы поддержки.',
+        bg: IMAGES.q8,
+        answers: [
+          'Верно',
+          'Неверно'
+        ],
+        correct: 0 
+      },
+      {
+        text: '9. Тебе звонит знакомый голосом друга и срочно просит перевести деньги. Позже выясняется, что голос мог быть создан нейросетью. Как лучше поступить?',
+        bg: IMAGES.q9,
+        answers: [
+          'Сразу перевести деньги, ведь голос знакомый',
+          'Проверить информацию, связавшись с другом по известному номеру или другим способом',
+          'Отправить свои личные данные для подтверждения личности',
+          'Попросить позвонить ещё раз и сразу согласиться'
+        ],
+        correct: 1 
+      },
+      {
+        text: '10. Если подключиться к общественной сети Wi-Fi в кафе или торговом центре, все передаваемые данные автоматически становятся защищёнными.',
+        bg: IMAGES.q10,
+        answers: [
+          'Верно',
+          'Неверно'
+        ],
+        correct: 1 
+      },
+
+      // --- 11-15 ВОПРОСЫ ---
+      {
+        text: '11. Если приложение скачано из официального магазина, оно гарантированно не собирает лишние личные данные.',
+        bg: IMAGES.q11,
+        answers: [
+          'Верно',
+          'Неверно'
+        ],
+        correct: 1 
+      },
+      {
+        text: '12. Ты скачиваешь приложение-фонарик, а оно просит доступ к контактам, микрофону и геолокации. Что лучше сделать?',
+        bg: IMAGES.q12,
+        answers: [
+          'Отключить пароль на телефоне',
+          'Проверить разрешения и не предоставлять доступы, которые не нужны для работы приложения',
+          'Разрешить всё, чтобы приложение работало быстрее',
+          'Отправить разработчику свои контакты'
+        ],
+        correct: 1 
+      },
+      {
+        text: '13. Даже если профиль в социальной сети закрытый, опубликованное фото или видео может попасть к посторонним людям.',
+        bg: IMAGES.q13,
+        answers: [
+          'Верно',
+          'Неверно'
+        ],
+        correct: 0 
+      },
+      {
+        text: '14. Как можно лучше защитить свой аккаунт в социальной сети? (Выбери ВСЕ правильные действия)',
+        bg: IMAGES.q14,
+        answers: [
+          'Не сообщать пароль другим людям',
+          'Использовать сложный и уникальный пароль',
+          'Включить двухфакторную аутентификацию',
+          'Использовать один пароль на всех сайтах'
+        ],
+        correct: [0, 1, 2] 
+      },
+      {
+        text: '15. Ты познакомился с человеком в интернете. Он просит прислать фотографию паспорта или назвать домашний адрес. Как поступить?',
+        bg: IMAGES.q15,
+        answers: [
+          'Отправить, если он кажется дружелюбным',
+          'Не отправлять личные данные и прекратить подозрительный разговор',
+          'Попросить его сначала отправить свой документ',
+          'Отправить только часть документов'
+        ],
+        correct: 1 
       }
     ];
 
@@ -327,10 +465,12 @@
     const qText = document.getElementById('q-text');
     const answersBox = document.getElementById('answers-box');
     const progressFill = document.getElementById('progress');
+    const nextBtn = document.getElementById('next-btn');
     
     let currentIndex = 0;
     let score = 0;
-    const DELAY = 1800;
+    let selectedMulti = []; 
+    let isMulti = false;
 
     screens.start.style.backgroundImage = `url('${IMAGES.start}')`;
     screens.results.style.backgroundImage = `url('${IMAGES.results}')`;
@@ -353,12 +493,21 @@
       progressFill.style.width = `${((currentIndex + 1) / QUESTIONS.length) * 100}%`;
       qText.textContent = q.text;
       answersBox.innerHTML = '';
-      
-      const letters = ['A', 'B', 'C', 'D'];
+      nextBtn.classList.remove('show'); 
+      selectedMulti = [];
+      isMulti = Array.isArray(q.correct);
+
       q.answers.forEach((answer, index) => {
         const btn = document.createElement('button');
         btn.className = 'answer';
-        btn.innerHTML = `<span class="letter">${letters[index]}</span> <span>${answer}</span>`;
+        
+        let letterHtml = '';
+        if (q.answers.length > 2) {
+          const letters = ['A', 'B', 'C', 'D'];
+          letterHtml = `<span class="letter">${letters[index]}</span> `;
+        }
+        
+        btn.innerHTML = `${letterHtml}<span>${answer}</span>`;
         btn.onclick = () => handleAnswer(index, btn);
         answersBox.appendChild(btn);
       });
@@ -366,9 +515,29 @@
 
     function handleAnswer(selectedIndex, clickedBtn) {
       const q = QUESTIONS[currentIndex];
-      const allBtns = document.querySelectorAll('.answer');
       
-      allBtns.forEach(b => b.disabled = true);
+      if (isMulti) {
+        if (clickedBtn.classList.contains('disabled')) return;
+        if (clickedBtn.classList.contains('correct') || clickedBtn.classList.contains('wrong')) return;
+
+        if (clickedBtn.classList.contains('selected')) {
+          clickedBtn.classList.remove('selected');
+          selectedMulti = selectedMulti.filter(i => i !== selectedIndex);
+        } else {
+          clickedBtn.classList.add('selected');
+          selectedMulti.push(selectedIndex);
+        }
+
+        if (selectedMulti.length > 0) {
+          nextBtn.classList.add('show');
+        } else {
+          nextBtn.classList.remove('show');
+        }
+        return;
+      }
+
+      const allBtns = document.querySelectorAll('.answer');
+      allBtns.forEach(b => b.classList.add('disabled'));
       allBtns[q.correct].classList.add('correct');
       
       if (selectedIndex !== q.correct) {
@@ -378,13 +547,45 @@
       }
 
       setTimeout(() => {
-        currentIndex++;
-        if (currentIndex < QUESTIONS.length) {
-          renderQuestion();
-        } else {
-          showResults();
-        }
-      }, DELAY);
+        nextQuestion();
+      }, 1800); 
+    }
+
+    function nextQuestion() {
+      const q = QUESTIONS[currentIndex];
+
+      if (isMulti) {
+        const allBtns = document.querySelectorAll('.answer');
+        allBtns.forEach(b => b.classList.add('disabled'));
+        
+        let isPerfect = selectedMulti.length === q.correct.length && selectedMulti.every(val => q.correct.includes(val));
+        
+        allBtns.forEach((btn, idx) => {
+          if (q.correct.includes(idx)) {
+            btn.classList.add('correct');
+          } else if (selectedMulti.includes(idx)) {
+            btn.classList.add('wrong');
+          }
+          btn.classList.remove('selected');
+        });
+
+        if (isPerfect) score++;
+
+        nextBtn.style.display = 'none';
+        setTimeout(() => {
+          currentIndex++;
+          if (currentIndex < QUESTIONS.length) renderQuestion();
+          else showResults();
+        }, 2000);
+        return;
+      }
+
+      currentIndex++;
+      if (currentIndex < QUESTIONS.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
     }
 
     function showResults() {
