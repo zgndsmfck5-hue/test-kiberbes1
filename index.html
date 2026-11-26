@@ -267,9 +267,6 @@
   </section>
 
   <script>
-    /* =========================================================
-       ПУТИ К КАРТИНКАМ (замени .jpg на .png, если нужно)
-       ========================================================= */
     const IMAGES = {
       start: 'images/bg-start.jpg',
       results: 'images/bg-results.jpg',
@@ -291,7 +288,7 @@
     };
 
     const QUESTIONS = [
-      // --- 1-5 ВОПРОСЫ ---
+      // --- 1-5 ---
       {
         text: '1. Что такое кибербуллинг?',
         bg: IMAGES.q1,
@@ -348,7 +345,7 @@
         correct: 2 
       },
 
-      // --- 6-10 ВОПРОСЫ ---
+      // --- 6-10 ---
       {
         text: '6. Тебе приходит сообщение якобы от администрации школы: «Твой аккаунт будет заблокирован! Срочно перейди по ссылке и введи пароль». Что делать?',
         bg: IMAGES.q6,
@@ -374,10 +371,7 @@
       {
         text: '8. Никому нельзя сообщать одноразовые коды подтверждения из SMS или приложения, даже если человек представляется сотрудником службы поддержки.',
         bg: IMAGES.q8,
-        answers: [
-          'Верно',
-          'Неверно'
-        ],
+        answers: ['Верно', 'Неверно'],
         correct: 0 
       },
       {
@@ -394,21 +388,15 @@
       {
         text: '10. Если подключиться к общественной сети Wi-Fi в кафе или торговом центре, все передаваемые данные автоматически становятся защищёнными.',
         bg: IMAGES.q10,
-        answers: [
-          'Верно',
-          'Неверно'
-        ],
+        answers: ['Верно', 'Неверно'],
         correct: 1 
       },
 
-      // --- 11-15 ВОПРОСЫ ---
+      // --- 11-15 ---
       {
         text: '11. Если приложение скачано из официального магазина, оно гарантированно не собирает лишние личные данные.',
         bg: IMAGES.q11,
-        answers: [
-          'Верно',
-          'Неверно'
-        ],
+        answers: ['Верно', 'Неверно'],
         correct: 1 
       },
       {
@@ -425,10 +413,7 @@
       {
         text: '13. Даже если профиль в социальной сети закрытый, опубликованное фото или видео может попасть к посторонним людям.',
         bg: IMAGES.q13,
-        answers: [
-          'Верно',
-          'Неверно'
-        ],
+        answers: ['Верно', 'Неверно'],
         correct: 0 
       },
       {
@@ -470,7 +455,7 @@
     let score = 0;
     let selectedMulti = []; 
     let isMulti = false;
-    let isAnswering = false; // ЗАЩИТА ОТ ДВОЙНЫХ КЛИКОВ
+    let isAnswering = false;
 
     screens.start.style.backgroundImage = `url('${IMAGES.start}')`;
     screens.results.style.backgroundImage = `url('${IMAGES.results}')`;
@@ -488,14 +473,18 @@
     }
 
     function renderQuestion() {
-      isAnswering = false; // Сбрасываем блокировку для нового вопроса
+      isAnswering = false; 
       const q = QUESTIONS[currentIndex];
       
       screens.quiz.style.backgroundImage = `url('${q.bg}')`;
       progressFill.style.width = `${((currentIndex + 1) / QUESTIONS.length) * 100}%`;
       qText.textContent = q.text;
       answersBox.innerHTML = '';
+      
+      // Сбрасываем и скрываем кнопку "Дальше" для нового вопроса
       nextBtn.classList.remove('show'); 
+      nextBtn.style.display = ''; 
+      
       selectedMulti = [];
       isMulti = Array.isArray(q.correct);
 
@@ -516,11 +505,11 @@
     }
 
     function handleAnswer(selectedIndex, clickedBtn) {
-      if (isAnswering) return; // Если уже отвечаем, игнорируем клики
+      if (isAnswering) return; 
       
       const q = QUESTIONS[currentIndex];
       
-      // --- ЛОГИКА ДЛЯ МУЛЬТИВЫБОРА ---
+      // --- МУЛЬТИВЫБОР (7 и 14 вопросы) ---
       if (isMulti) {
         if (clickedBtn.classList.contains('disabled')) return;
         if (clickedBtn.classList.contains('correct') || clickedBtn.classList.contains('wrong')) return;
@@ -533,6 +522,7 @@
           selectedMulti.push(selectedIndex);
         }
 
+        // Если выбран хотя бы один вариант, показываем кнопку "Дальше"
         if (selectedMulti.length > 0) {
           nextBtn.classList.add('show');
         } else {
@@ -541,8 +531,8 @@
         return;
       }
 
-      // --- ЛОГИКА ДЛЯ ОДИНОЧНОГО ВЫБОРА ---
-      isAnswering = true; // Мгновенно блокируем возможность кликать дальше
+      // --- ОДИНОЧНЫЙ ВЫБОР ---
+      isAnswering = true; 
 
       const allBtns = document.querySelectorAll('.answer');
       allBtns.forEach(b => b.classList.add('disabled'));
@@ -562,6 +552,7 @@
     function nextQuestion() {
       const q = QUESTIONS[currentIndex];
 
+      // Если это был мультивыбор
       if (isMulti) {
         const allBtns = document.querySelectorAll('.answer');
         allBtns.forEach(b => b.classList.add('disabled'));
@@ -579,7 +570,9 @@
 
         if (isPerfect) score++;
 
-        nextBtn.style.display = 'none';
+        // Скрываем кнопку и даем посмотреть на результат
+        nextBtn.classList.remove('show');
+        
         setTimeout(() => {
           currentIndex++;
           if (currentIndex < QUESTIONS.length) renderQuestion();
@@ -588,6 +581,7 @@
         return;
       }
 
+      // Обычный переход для одиночного выбора
       currentIndex++;
       if (currentIndex < QUESTIONS.length) {
         renderQuestion();
