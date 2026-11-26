@@ -268,7 +268,7 @@
 
   <script>
     /* =========================================================
-       ЗДЕСЬ МЫ ДОБАВИЛИ ПУТИ ДЛЯ НОВЫХ 10 КАРТИНОК
+       ПУТИ К КАРТИНКАМ (замени .jpg на .png, если нужно)
        ========================================================= */
     const IMAGES = {
       start: 'images/bg-start.jpg',
@@ -278,7 +278,6 @@
       q3: 'images/q3.jpg',
       q4: 'images/q4.jpg',
       q5: 'images/q5.jpg',
-      // Новые фоны для вопросов 6-15
       q6: 'images/q6.jpg',
       q7: 'images/q7.jpg',
       q8: 'images/q8.jpg',
@@ -471,6 +470,7 @@
     let score = 0;
     let selectedMulti = []; 
     let isMulti = false;
+    let isAnswering = false; // ЗАЩИТА ОТ ДВОЙНЫХ КЛИКОВ
 
     screens.start.style.backgroundImage = `url('${IMAGES.start}')`;
     screens.results.style.backgroundImage = `url('${IMAGES.results}')`;
@@ -488,7 +488,9 @@
     }
 
     function renderQuestion() {
+      isAnswering = false; // Сбрасываем блокировку для нового вопроса
       const q = QUESTIONS[currentIndex];
+      
       screens.quiz.style.backgroundImage = `url('${q.bg}')`;
       progressFill.style.width = `${((currentIndex + 1) / QUESTIONS.length) * 100}%`;
       qText.textContent = q.text;
@@ -514,8 +516,11 @@
     }
 
     function handleAnswer(selectedIndex, clickedBtn) {
+      if (isAnswering) return; // Если уже отвечаем, игнорируем клики
+      
       const q = QUESTIONS[currentIndex];
       
+      // --- ЛОГИКА ДЛЯ МУЛЬТИВЫБОРА ---
       if (isMulti) {
         if (clickedBtn.classList.contains('disabled')) return;
         if (clickedBtn.classList.contains('correct') || clickedBtn.classList.contains('wrong')) return;
@@ -535,6 +540,9 @@
         }
         return;
       }
+
+      // --- ЛОГИКА ДЛЯ ОДИНОЧНОГО ВЫБОРА ---
+      isAnswering = true; // Мгновенно блокируем возможность кликать дальше
 
       const allBtns = document.querySelectorAll('.answer');
       allBtns.forEach(b => b.classList.add('disabled'));
