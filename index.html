@@ -50,7 +50,19 @@
       min-height: 100%; 
     }
 
-    #screen-start::before, #screen-results::before {
+    /* ================= СПЕЦИАЛЬНЫЕ НАСТРОЙКИ ДЛЯ СТАРТОВОГО ЭКРАНА ================= */
+    #screen-start {
+      /* contain позволяет картинке помещаться целиком на любом экране */
+      background-size: contain; 
+      background-color: #050a14; /* Темный фон, чтобы залить пустые края */
+    }
+
+    #screen-start::before {
+      /* Убираем затемнение, чтобы картинка была яркой */
+      background: transparent; 
+    }
+
+    #screen-results::before {
       background: rgba(0, 0, 0, 0.3); 
     }
 
@@ -234,7 +246,8 @@
 
     @media (max-width: 500px) {
       .content { padding: 20px 15px; border-radius: 16px; }
-      #screen-start .content { padding-bottom: 30px; }
+      /* На мобилках кнопка чуть выше, чтобы не перекрывать картинку */
+      #screen-start .content { padding-bottom: 20px; }
       #screen-results .content { padding: 25px 15px; }
       .answer { padding: 12px; gap: 10px; }
       .answer .letter { width: 26px; height: 26px; font-size: 0.8rem; }
@@ -268,7 +281,7 @@
 
   <script>
     const IMAGES = {
-      start: 'images/bg-start.jpg',
+      start: 'images/bg-start.jpg',  // <-- Убедись, что картинка с мозгом загружена под этим именем
       results: 'images/bg-results.jpg',
       q1: 'images/q1.jpg',
       q2: 'images/q2.jpg',
@@ -481,7 +494,6 @@
       qText.textContent = q.text;
       answersBox.innerHTML = '';
       
-      // Сбрасываем и скрываем кнопку "Дальше" для нового вопроса
       nextBtn.classList.remove('show'); 
       nextBtn.style.display = ''; 
       
@@ -509,7 +521,6 @@
       
       const q = QUESTIONS[currentIndex];
       
-      // --- МУЛЬТИВЫБОР (7 и 14 вопросы) ---
       if (isMulti) {
         if (clickedBtn.classList.contains('disabled')) return;
         if (clickedBtn.classList.contains('correct') || clickedBtn.classList.contains('wrong')) return;
@@ -522,7 +533,6 @@
           selectedMulti.push(selectedIndex);
         }
 
-        // Если выбран хотя бы один вариант, показываем кнопку "Дальше"
         if (selectedMulti.length > 0) {
           nextBtn.classList.add('show');
         } else {
@@ -531,7 +541,6 @@
         return;
       }
 
-      // --- ОДИНОЧНЫЙ ВЫБОР ---
       isAnswering = true; 
 
       const allBtns = document.querySelectorAll('.answer');
@@ -552,7 +561,6 @@
     function nextQuestion() {
       const q = QUESTIONS[currentIndex];
 
-      // Если это был мультивыбор
       if (isMulti) {
         const allBtns = document.querySelectorAll('.answer');
         allBtns.forEach(b => b.classList.add('disabled'));
@@ -570,7 +578,6 @@
 
         if (isPerfect) score++;
 
-        // Скрываем кнопку и даем посмотреть на результат
         nextBtn.classList.remove('show');
         
         setTimeout(() => {
@@ -581,7 +588,6 @@
         return;
       }
 
-      // Обычный переход для одиночного выбора
       currentIndex++;
       if (currentIndex < QUESTIONS.length) {
         renderQuestion();
